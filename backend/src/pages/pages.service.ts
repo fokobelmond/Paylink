@@ -55,7 +55,7 @@ export class PagesService {
         description: dto.description,
         logoUrl: dto.logoUrl,
         primaryColor: dto.primaryColor || '#2563eb',
-        templateData: dto.templateData || {},
+        templateData: (dto.templateData || {}) as any,
         status: 'DRAFT',
       },
       include: {

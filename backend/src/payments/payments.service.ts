@@ -86,7 +86,7 @@ export class PaymentsService {
     }
 
     // Valider le montant
-    const amount = dto.amount || service?.price;
+    const amount = dto.amount || service?.displayPrice || service?.basePrice;
     if (!amount || amount < 100) {
       throw new BadRequestException('Montant invalide (minimum 100 FCFA)');
     }
@@ -100,7 +100,11 @@ export class PaymentsService {
         reference,
         pageId: dto.pageId,
         serviceId: dto.serviceId,
-        amount,
+        grossAmount: amount,
+        netAmount: service?.netPrice || amount,
+        providerFee: 0,
+        platformFee: 0,
+        feeSnapshot: {},
         currency: 'XAF',
         payerPhone: this.normalizePhone(dto.payerPhone),
         payerName: dto.payerName,

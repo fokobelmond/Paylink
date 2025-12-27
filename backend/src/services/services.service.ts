@@ -49,7 +49,9 @@ export class ServicesService {
         pageId,
         name: dto.name,
         description: dto.description,
-        price: dto.price,
+        basePrice: dto.price,
+        displayPrice: dto.price,
+        netPrice: dto.price,
         sortOrder,
       },
     });

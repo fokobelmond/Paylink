@@ -179,7 +179,7 @@ export class TransactionsService {
             status: 'SUCCESS',
             createdAt: { gte: startDate },
           },
-          _sum: { amount: true },
+          _sum: { grossAmount: true },
         }),
       ]);
 
@@ -188,7 +188,7 @@ export class TransactionsService {
       successCount,
       pendingCount,
       failedCount,
-      totalRevenue: totalRevenue._sum.amount || 0,
+      totalRevenue: totalRevenue._sum?.grossAmount || 0,
     };
   }
 
@@ -233,7 +233,7 @@ export class TransactionsService {
       tx.createdAt.toISOString(),
       tx.page.title,
       tx.service?.name || '-',
-      tx.amount,
+      tx.grossAmount,
       tx.payerName || '-',
       tx.payerPhone,
       tx.provider,

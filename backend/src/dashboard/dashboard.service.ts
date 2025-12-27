@@ -48,7 +48,7 @@ export class DashboardService {
           page: { userId },
           status: 'SUCCESS',
         },
-        _sum: { amount: true },
+        _sum: { grossAmount: true },
       }),
 
       // Transactions récentes
@@ -71,7 +71,7 @@ export class DashboardService {
     return {
       totalPages,
       totalTransactions,
-      totalRevenue: totalRevenueResult._sum.amount || 0,
+      totalRevenue: totalRevenueResult._sum?.grossAmount || 0,
       pendingTransactions,
       recentTransactions,
       revenueByDay,
@@ -89,7 +89,7 @@ export class DashboardService {
         paidAt: { gte: startDate },
       },
       select: {
-        amount: true,
+        grossAmount: true,
         paidAt: true,
       },
       orderBy: { paidAt: 'asc' },
@@ -101,7 +101,7 @@ export class DashboardService {
     transactions.forEach((tx) => {
       if (tx.paidAt) {
         const dateKey = tx.paidAt.toISOString().split('T')[0];
-        revenueMap.set(dateKey, (revenueMap.get(dateKey) || 0) + tx.amount);
+        revenueMap.set(dateKey, (revenueMap.get(dateKey) || 0) + tx.grossAmount);
       }
     });
 
@@ -137,12 +137,12 @@ export class DashboardService {
             pageId: page.id,
             status: 'SUCCESS',
           },
-          _sum: { amount: true },
+          _sum: { grossAmount: true },
         });
 
         return {
           ...page,
-          totalRevenue: revenue._sum.amount || 0,
+          totalRevenue: revenue._sum?.grossAmount || 0,
         };
       }),
     );
