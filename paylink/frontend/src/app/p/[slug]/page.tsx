@@ -21,7 +21,7 @@ const mockPages: Record<string, Page> = {
       type: 'SERVICE_PROVIDER',
       profession: 'Coiffeuse professionnelle',
       location: 'Douala, Akwa',
-      whatsapp: '237655123456',
+      whatsapp: '237600000000',
     },
     viewCount: 234,
     createdAt: '2024-01-15T10:00:00Z',
@@ -273,7 +273,7 @@ const mockPages: Record<string, Page> = {
     templateData: {
       type: 'SIMPLE_SALE',
       productName: 'iPhone 14 Pro Max 256GB',
-      whatsapp: '237699888777',
+      whatsapp: '237600000000',
     },
     viewCount: 78,
     createdAt: '2024-01-23T09:00:00Z',
