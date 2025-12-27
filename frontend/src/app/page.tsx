@@ -162,7 +162,7 @@ export default function HomePage() {
                   Créer ma page gratuitement
                   <ArrowRight className="w-5 h-5" />
                 </Link>
-                <Link href="#demo" className="btn-outline text-lg px-8 py-4 w-full sm:w-auto">
+                <Link href="/p/marie-coiffure" className="btn-outline text-lg px-8 py-4 w-full sm:w-auto">
                   Voir une démo
                 </Link>
               </div>
