@@ -560,17 +560,17 @@ export default function HomePage() {
             <div>
               <h4 className="font-semibold text-white mb-4">Support</h4>
               <ul className="space-y-2 text-sm">
-                <li><a href="#" className="hover:text-white transition">Centre d'aide</a></li>
-                <li><a href="#" className="hover:text-white transition">Contact</a></li>
-                <li><a href="#" className="hover:text-white transition">FAQ</a></li>
+                <li><Link href="/aide" className="hover:text-white transition">Centre d'aide</Link></li>
+                <li><Link href="/contact" className="hover:text-white transition">Contact</Link></li>
+                <li><Link href="/aide" className="hover:text-white transition">FAQ</Link></li>
               </ul>
             </div>
 
             <div>
               <h4 className="font-semibold text-white mb-4">Légal</h4>
               <ul className="space-y-2 text-sm">
-                <li><a href="#" className="hover:text-white transition">Conditions d'utilisation</a></li>
-                <li><a href="#" className="hover:text-white transition">Politique de confidentialité</a></li>
+                <li><Link href="/conditions" className="hover:text-white transition">Conditions d'utilisation</Link></li>
+                <li><Link href="/confidentialite" className="hover:text-white transition">Politique de confidentialité</Link></li>
               </ul>
             </div>
           </div>
