@@ -19,10 +19,12 @@ import {
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { generateSlug, cn } from '@/lib/utils'
+import { pagesApi } from '@/lib/api'
 import {
   TEMPLATE_LABELS,
   TEMPLATE_ICONS,
   type TemplateType,
+  type ApiError,
 } from '@/types'
 
 const templates: { type: TemplateType; description: string }[] = [
@@ -115,13 +117,27 @@ export default function NewPagePage() {
     setIsLoading(true)
 
     try {
-      // Simuler l'appel API
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      // Appel API réel pour créer la page
+      const response = await pagesApi.create({
+        title: data.title,
+        slug: data.slug,
+        description: data.description || undefined,
+        templateType: selectedTemplate,
+        primaryColor: selectedColor,
+        templateData: {
+          type: selectedTemplate,
+        },
+      })
 
-      toast.success('Page créée avec succès !')
-      router.push('/dashboard/pages')
+      if (response.success) {
+        toast.success('Page créée avec succès !')
+        router.push('/dashboard/pages')
+      } else {
+        toast.error(response.message || 'Erreur lors de la création')
+      }
     } catch (error) {
-      toast.error('Erreur lors de la création')
+      const apiError = error as ApiError
+      toast.error(apiError.message || 'Erreur lors de la création')
     } finally {
       setIsLoading(false)
     }

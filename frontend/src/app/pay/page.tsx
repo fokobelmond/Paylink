@@ -352,7 +352,7 @@ function PaymentPageContent() {
         {/* Footer */}
         <p className="text-center text-sm text-slate-400 mt-6">
           En payant, vous acceptez nos{' '}
-          <Link href="/terms" className="underline">
+          <Link href="/conditions" className="underline">
             conditions d'utilisation
           </Link>
         </p>
