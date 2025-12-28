@@ -15,6 +15,7 @@ import {
   ApiParam,
   ApiHeader,
 } from '@nestjs/swagger';
+import { Throttle, SkipThrottle } from '@nestjs/throttler';
 import { PaymentsService } from './payments.service';
 import { InitiatePaymentDto } from './dto/initiate-payment.dto';
 
@@ -24,6 +25,7 @@ export class PaymentsController {
   constructor(private readonly paymentsService: PaymentsService) {}
 
   @Post('initiate')
+  @Throttle({ default: { limit: 10, ttl: 60000 } }) // 10 paiements par minute par IP
   @ApiOperation({ summary: 'Initier un paiement Mobile Money (public)' })
   @ApiResponse({ status: 201, description: 'Paiement initié' })
   @ApiResponse({ status: 400, description: 'Données invalides' })
@@ -56,6 +58,7 @@ export class PaymentsController {
   }
 
   @Post('webhook/orange-money')
+  @SkipThrottle() // Les webhooks viennent des providers, pas des utilisateurs
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Webhook Orange Money' })
   @ApiHeader({ name: 'x-signature', description: 'Signature du webhook' })
@@ -72,6 +75,7 @@ export class PaymentsController {
   }
 
   @Post('webhook/mtn-momo')
+  @SkipThrottle() // Les webhooks viennent des providers, pas des utilisateurs
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Webhook MTN MoMo' })
   @ApiHeader({ name: 'x-signature', description: 'Signature du webhook' })

@@ -3,12 +3,16 @@ import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
+import { AllExceptionsFilter } from './common/filters/http-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   // Security
   app.use(helmet());
+
+  // Global exception filter
+  app.useGlobalFilters(new AllExceptionsFilter());
 
   // CORS - Configuration permissive pour production
   const allowedOrigins = [
