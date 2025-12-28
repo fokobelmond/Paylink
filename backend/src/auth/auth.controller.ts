@@ -96,6 +96,38 @@ export class AuthController {
       data: user,
     };
   }
+
+  @Post('forgot-password')
+  @Throttle({ default: { limit: 3, ttl: 60000 } }) // 3 demandes par minute max
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Demander la réinitialisation du mot de passe' })
+  @ApiResponse({ status: 200, description: 'Email envoyé si le compte existe' })
+  @ApiResponse({ status: 429, description: 'Trop de tentatives, réessayez plus tard' })
+  async forgotPassword(@Body('email') email: string) {
+    await this.authService.forgotPassword(email);
+    return {
+      success: true,
+      message: 'Si un compte existe avec cet email, vous recevrez un lien de réinitialisation.',
+    };
+  }
+
+  @Post('reset-password')
+  @Throttle({ default: { limit: 5, ttl: 60000 } }) // 5 tentatives par minute max
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Réinitialiser le mot de passe avec un token' })
+  @ApiResponse({ status: 200, description: 'Mot de passe réinitialisé' })
+  @ApiResponse({ status: 400, description: 'Token invalide ou expiré' })
+  @ApiResponse({ status: 429, description: 'Trop de tentatives, réessayez plus tard' })
+  async resetPassword(
+    @Body('token') token: string,
+    @Body('password') password: string,
+  ) {
+    await this.authService.resetPassword(token, password);
+    return {
+      success: true,
+      message: 'Mot de passe réinitialisé avec succès. Vous pouvez maintenant vous connecter.',
+    };
+  }
 }
 
 

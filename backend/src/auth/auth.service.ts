@@ -236,6 +236,71 @@ export class AuthService {
   }
 
   /**
+   * Demande de réinitialisation de mot de passe
+   * Note: Pour éviter l'énumération d'emails, on renvoie toujours un succès
+   */
+  async forgotPassword(email: string): Promise<void> {
+    const user = await this.prisma.user.findUnique({
+      where: { email: email.toLowerCase() },
+    });
+
+    if (!user) {
+      // On ne révèle pas si l'email existe ou non
+      return;
+    }
+
+    // Générer un token de réinitialisation (valide 1 heure)
+    const resetToken = this.jwtService.sign(
+      { sub: user.id, type: 'password-reset' },
+      { expiresIn: '1h' },
+    );
+
+    // TODO: Envoyer l'email avec le lien de réinitialisation
+    // Pour l'instant, on log le token (à remplacer par l'envoi d'email)
+    console.log(`[FORGOT PASSWORD] Token for ${email}: ${resetToken}`);
+
+    // En production, implémenter l'envoi d'email avec Resend ou autre
+    // await this.emailService.sendPasswordResetEmail(user.email, resetToken);
+  }
+
+  /**
+   * Réinitialiser le mot de passe avec un token
+   */
+  async resetPassword(token: string, newPassword: string): Promise<void> {
+    try {
+      const payload = this.jwtService.verify(token);
+
+      if (payload.type !== 'password-reset') {
+        throw new BadRequestException('Token invalide');
+      }
+
+      const user = await this.prisma.user.findUnique({
+        where: { id: payload.sub },
+      });
+
+      if (!user) {
+        throw new BadRequestException('Token invalide');
+      }
+
+      // Hasher le nouveau mot de passe
+      const passwordHash = await bcrypt.hash(newPassword, 12);
+
+      // Mettre à jour le mot de passe
+      await this.prisma.user.update({
+        where: { id: user.id },
+        data: { passwordHash },
+      });
+
+      // Invalider tous les refresh tokens (déconnexion de toutes les sessions)
+      await this.prisma.refreshToken.deleteMany({
+        where: { userId: user.id },
+      });
+    } catch {
+      throw new BadRequestException('Token invalide ou expiré');
+    }
+  }
+
+  /**
    * Générer les tokens JWT
    */
   private async generateTokens(
