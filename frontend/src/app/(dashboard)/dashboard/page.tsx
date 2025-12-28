@@ -13,134 +13,63 @@ import {
   ExternalLink,
   Copy,
   Check,
+  Loader2,
 } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { formatCurrency, formatRelativeDate, copyToClipboard, cn } from '@/lib/utils'
 import { useAuthStore } from '@/store/auth'
+import { dashboardApi, pagesApi } from '@/lib/api'
 import { TRANSACTION_STATUS_COLORS, TRANSACTION_STATUS_LABELS } from '@/types'
-import type { DashboardStats, Transaction, Page } from '@/types'
+import type { DashboardStats, Transaction, Page, ApiError } from '@/types'
 
-// Données mock pour la démo
-const mockStats: DashboardStats = {
-  totalPages: 2,
-  totalTransactions: 47,
-  totalRevenue: 485000,
-  pendingTransactions: 3,
-  recentTransactions: [
-    {
-      id: '1',
-      reference: 'PL-A7X3K9',
-      pageId: 'page1',
-      serviceId: 'service1',
-      grossAmount: 15600,    // Ce que le client a payé
-      netAmount: 15000,      // Ce que le vendeur reçoit
-      providerFee: 234,      // Frais Orange (1.5%)
-      platformFee: 366,      // Marge PayLink (2%)
-      amount: 15600,         // Legacy
-      currency: 'XAF',
-      payerPhone: '237655123456',
-      payerName: 'Jean Kamga',
-      payerEmail: null,
-      provider: 'ORANGE_MONEY',
-      status: 'SUCCESS',
-      providerReference: 'OM123456',
-      createdAt: new Date(Date.now() - 1000 * 60 * 30).toISOString(), // 30 min ago
-      paidAt: new Date(Date.now() - 1000 * 60 * 29).toISOString(),
-    },
-    {
-      id: '2',
-      reference: 'PL-B2Y8M5',
-      pageId: 'page1',
-      serviceId: null,
-      grossAmount: 5200,
-      netAmount: 5000,
-      providerFee: 78,
-      platformFee: 122,
-      amount: 5200,
-      currency: 'XAF',
-      payerPhone: '237670987654',
-      payerName: 'Marie Fouda',
-      payerEmail: null,
-      provider: 'MTN_MOMO',
-      status: 'SUCCESS',
-      providerReference: 'MTN789012',
-      createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(), // 2h ago
-      paidAt: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
-    },
-    {
-      id: '3',
-      reference: 'PL-C9Z1N4',
-      pageId: 'page2',
-      serviceId: null,
-      grossAmount: 26000,
-      netAmount: 25000,
-      providerFee: 390,
-      platformFee: 610,
-      amount: 26000,
-      currency: 'XAF',
-      payerPhone: '237699111222',
-      payerName: 'Paul Ndjock',
-      payerEmail: null,
-      provider: 'ORANGE_MONEY',
-      status: 'PENDING',
-      providerReference: null,
-      createdAt: new Date(Date.now() - 1000 * 60 * 15).toISOString(), // 15 min ago
-      paidAt: null,
-    },
-  ],
-  revenueByDay: [
-    { date: '2024-01-20', amount: 45000 },
-    { date: '2024-01-21', amount: 78000 },
-    { date: '2024-01-22', amount: 62000 },
-    { date: '2024-01-23', amount: 95000 },
-    { date: '2024-01-24', amount: 43000 },
-    { date: '2024-01-25', amount: 87000 },
-    { date: '2024-01-26', amount: 75000 },
-  ],
+// Données de démonstration (fallback)
+const defaultStats: DashboardStats = {
+  totalPages: 0,
+  totalTransactions: 0,
+  totalRevenue: 0,
+  pendingTransactions: 0,
+  recentTransactions: [],
+  revenueByDay: [],
 }
-
-const mockPages: Page[] = [
-  {
-    id: 'page1',
-    slug: 'marie-coiffure',
-    userId: 'user1',
-    templateType: 'SERVICE_PROVIDER',
-    status: 'PUBLISHED',
-    title: 'Marie Coiffure',
-    description: 'Coiffure et soins capillaires à Douala',
-    logoUrl: null,
-    primaryColor: '#2563eb',
-    templateData: { type: 'SERVICE_PROVIDER' },
-    viewCount: 234,
-    createdAt: '2024-01-15T10:00:00Z',
-    updatedAt: '2024-01-20T14:30:00Z',
-    publishedAt: '2024-01-15T12:00:00Z',
-    services: [],
-  },
-  {
-    id: 'page2',
-    slug: 'formation-excel',
-    userId: 'user1',
-    templateType: 'TRAINING',
-    status: 'DRAFT',
-    title: 'Formation Excel Pro',
-    description: 'Maîtrisez Excel en 5 jours',
-    logoUrl: null,
-    primaryColor: '#059669',
-    templateData: { type: 'TRAINING', trainingName: 'Excel Pro' },
-    viewCount: 0,
-    createdAt: '2024-01-22T09:00:00Z',
-    updatedAt: '2024-01-22T09:00:00Z',
-    publishedAt: null,
-    services: [],
-  },
-]
 
 export default function DashboardPage() {
   const { user } = useAuthStore()
-  const [stats] = useState<DashboardStats>(mockStats)
-  const [pages] = useState<Page[]>(mockPages)
+  const [stats, setStats] = useState<DashboardStats>(defaultStats)
+  const [pages, setPages] = useState<Page[]>([])
   const [copiedSlug, setCopiedSlug] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true)
+      
+      try {
+        // Charger les stats du dashboard
+        const statsResponse = await dashboardApi.getStats()
+        if (statsResponse.success && statsResponse.data) {
+          setStats(statsResponse.data)
+        }
+      } catch (error) {
+        console.log('Erreur chargement stats:', (error as ApiError).message)
+        // Garder les stats par défaut
+      }
+
+      try {
+        // Charger les pages de l'utilisateur
+        const pagesResponse = await pagesApi.list(1, 5)
+        if (pagesResponse.success && pagesResponse.data) {
+          setPages(pagesResponse.data.items || [])
+        }
+      } catch (error) {
+        console.log('Erreur chargement pages:', (error as ApiError).message)
+        // Garder les pages vides
+      }
+
+      setIsLoading(false)
+    }
+
+    fetchData()
+  }, [])
 
   const handleCopyLink = async (slug: string) => {
     const url = `${window.location.origin}/p/${slug}`
@@ -174,6 +103,17 @@ export default function DashboardPage() {
       icon: FileText,
     },
   ]
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin text-primary-600 mx-auto mb-4" />
+          <p className="text-slate-600">Chargement du tableau de bord...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-8">

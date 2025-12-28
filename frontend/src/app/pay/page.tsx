@@ -19,7 +19,8 @@ import {
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { formatCurrency, isValidCameroonPhone, cn } from '@/lib/utils'
-import type { PaymentProvider } from '@/types'
+import { transactionsApi } from '@/lib/api'
+import type { PaymentProvider, ApiError } from '@/types'
 
 const paymentSchema = z.object({
   payerPhone: z.string().refine(isValidCameroonPhone, 'Numéro invalide'),
@@ -41,8 +42,9 @@ function PaymentPageContent() {
 
   const [provider, setProvider] = useState<PaymentProvider | null>(null)
   const [isLoading, setIsLoading] = useState(false)
-  const [step, setStep] = useState<'form' | 'processing' | 'success'>('form')
+  const [step, setStep] = useState<'form' | 'processing' | 'success' | 'error'>('form')
   const [transactionRef, setTransactionRef] = useState<string | null>(null)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   const {
     register,
@@ -78,24 +80,55 @@ function PaymentPageContent() {
   }, [phoneValue])
 
   const onSubmit = async (data: PaymentFormData) => {
-    if (!provider) {
+    if (!provider || !pageId) {
       return
     }
 
     setIsLoading(true)
     setStep('processing')
+    setErrorMessage(null)
 
     try {
-      // Simuler l'appel API
-      await new Promise((resolve) => setTimeout(resolve, 3000))
+      // Appel API pour initier le paiement
+      const response = await transactionsApi.initiate({
+        pageId,
+        serviceId: serviceId || undefined,
+        amount,
+        payerPhone: data.payerPhone,
+        payerName: data.payerName,
+        provider,
+      })
 
-      // Générer une référence de transaction
-      const ref = `PL-${Math.random().toString(36).substring(2, 8).toUpperCase()}`
-      setTransactionRef(ref)
-      setStep('success')
+      if (response.success && response.data) {
+        const { transaction } = response.data
+        setTransactionRef(transaction.reference)
+        
+        // Simuler l'attente de confirmation du paiement
+        // En production, on utiliserait un polling ou des websockets
+        // pour vérifier le statut du paiement
+        await new Promise((resolve) => setTimeout(resolve, 3000))
+        
+        // Vérifier le statut du paiement
+        const statusResponse = await transactionsApi.checkStatus(transaction.reference)
+        
+        if (statusResponse.success && statusResponse.data?.status === 'SUCCESS') {
+          setStep('success')
+        } else if (statusResponse.data?.status === 'FAILED') {
+          setErrorMessage('Le paiement a échoué. Veuillez réessayer.')
+          setStep('error')
+        } else {
+          // Paiement en cours de traitement (PROCESSING)
+          // Afficher succès car le paiement est initié
+          setStep('success')
+        }
+      } else {
+        setErrorMessage('Erreur lors de l\'initiation du paiement')
+        setStep('error')
+      }
     } catch (error) {
-      setStep('form')
-      // Gérer l'erreur
+      const apiError = error as ApiError
+      setErrorMessage(apiError.message || 'Une erreur est survenue')
+      setStep('error')
     } finally {
       setIsLoading(false)
     }
@@ -119,6 +152,52 @@ function PaymentPageContent() {
             Retour à l'accueil
           </Link>
         </div>
+      </div>
+    )
+  }
+
+  // Étape d'erreur
+  if (step === 'error') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-red-50 to-white">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="text-center px-4 max-w-md"
+        >
+          <div className="w-20 h-20 rounded-full bg-red-500 mx-auto mb-6 flex items-center justify-center">
+            <span className="text-4xl">❌</span>
+          </div>
+
+          <h2 className="text-2xl font-bold text-slate-900 mb-2">
+            Paiement échoué
+          </h2>
+
+          <p className="text-slate-600 mb-6">
+            {errorMessage || 'Une erreur est survenue lors du paiement.'}
+          </p>
+
+          <div className="flex flex-col gap-3">
+            <button
+              onClick={() => {
+                setStep('form')
+                setErrorMessage(null)
+              }}
+              className="px-6 py-3 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 transition"
+            >
+              Réessayer
+            </button>
+
+            {slug && (
+              <Link
+                href={`/p/${slug}`}
+                className="px-6 py-3 bg-slate-200 text-slate-700 rounded-lg font-medium hover:bg-slate-300 transition"
+              >
+                Retour à la page
+              </Link>
+            )}
+          </div>
+        </motion.div>
       </div>
     )
   }
