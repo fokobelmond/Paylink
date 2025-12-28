@@ -1,0 +1,29 @@
+{
+  "name": "PayLink - Paiements Mobile Money",
+  "short_name": "PayLink",
+  "description": "Recevez des paiements via Orange Money et MTN MoMo au Cameroun",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#2563eb",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "fr",
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "categories": ["finance", "business"],
+  "prefer_related_applications": false
+}
+

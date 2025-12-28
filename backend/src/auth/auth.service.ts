@@ -9,6 +9,7 @@ import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
 import { UsersService } from '../users/users.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 
@@ -40,6 +41,7 @@ export class AuthService {
     private usersService: UsersService,
     private jwtService: JwtService,
     private configService: ConfigService,
+    private notifications: NotificationsService,
   ) {}
 
   /**
@@ -90,6 +92,11 @@ export class AuthService {
 
     // Sauvegarder le refresh token
     await this.saveRefreshToken(user.id, tokens.refreshToken);
+
+    // Envoyer l'email de bienvenue (en arrière-plan, ne pas bloquer)
+    this.notifications.sendWelcomeEmail(user.email, user.firstName).catch(() => {
+      // Ignorer les erreurs d'envoi d'email de bienvenue
+    });
 
     return {
       user: {
@@ -255,12 +262,12 @@ export class AuthService {
       { expiresIn: '1h' },
     );
 
-    // TODO: Envoyer l'email avec le lien de réinitialisation
-    // Pour l'instant, on log le token (à remplacer par l'envoi d'email)
-    console.log(`[FORGOT PASSWORD] Token for ${email}: ${resetToken}`);
-
-    // En production, implémenter l'envoi d'email avec Resend ou autre
-    // await this.emailService.sendPasswordResetEmail(user.email, resetToken);
+    // Envoyer l'email de réinitialisation
+    await this.notifications.sendPasswordResetEmail(
+      user.email,
+      resetToken,
+      user.firstName,
+    );
   }
 
   /**

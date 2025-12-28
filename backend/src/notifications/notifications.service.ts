@@ -175,6 +175,125 @@ export class NotificationsService {
   }
 
   /**
+   * Email de réinitialisation de mot de passe
+   */
+  async sendPasswordResetEmail(
+    email: string,
+    resetToken: string,
+    firstName: string,
+  ): Promise<boolean> {
+    const frontendUrl = this.configService.get('FRONTEND_URL') || 'https://paylink.cm';
+    const resetLink = `${frontendUrl}/reset-password?token=${resetToken}`;
+
+    return this.sendEmail(
+      email,
+      'Réinitialisation de votre mot de passe PayLink',
+      `
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <div style="text-align: center; margin-bottom: 30px;">
+            <h1 style="color: #2563eb; margin: 0;">PayLink</h1>
+          </div>
+          
+          <h2 style="color: #1e293b;">Bonjour ${firstName},</h2>
+          
+          <p style="color: #475569; line-height: 1.6;">
+            Vous avez demandé la réinitialisation de votre mot de passe PayLink.
+            Cliquez sur le bouton ci-dessous pour créer un nouveau mot de passe.
+          </p>
+          
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${resetLink}" 
+               style="display: inline-block; background: #2563eb; color: white; 
+                      padding: 14px 28px; border-radius: 8px; text-decoration: none;
+                      font-weight: 600;">
+              Réinitialiser mon mot de passe
+            </a>
+          </div>
+          
+          <p style="color: #64748b; font-size: 14px;">
+            Ce lien est valable pendant 1 heure. Si vous n'avez pas demandé cette 
+            réinitialisation, ignorez cet email.
+          </p>
+          
+          <p style="color: #64748b; font-size: 14px;">
+            Si le bouton ne fonctionne pas, copiez ce lien dans votre navigateur :<br>
+            <a href="${resetLink}" style="color: #2563eb; word-break: break-all;">
+              ${resetLink}
+            </a>
+          </p>
+          
+          <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 30px 0;">
+          
+          <p style="color: #94a3b8; font-size: 12px; text-align: center;">
+            © ${new Date().getFullYear()} PayLink. Tous droits réservés.<br>
+            Douala, Cameroun
+          </p>
+        </div>
+      `,
+    );
+  }
+
+  /**
+   * Email de bienvenue après inscription
+   */
+  async sendWelcomeEmail(
+    email: string,
+    firstName: string,
+  ): Promise<boolean> {
+    const frontendUrl = this.configService.get('FRONTEND_URL') || 'https://paylink.cm';
+
+    return this.sendEmail(
+      email,
+      'Bienvenue sur PayLink ! 🎉',
+      `
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <div style="text-align: center; margin-bottom: 30px;">
+            <h1 style="color: #2563eb; margin: 0;">PayLink</h1>
+          </div>
+          
+          <h2 style="color: #1e293b;">Bienvenue ${firstName} ! 🎉</h2>
+          
+          <p style="color: #475569; line-height: 1.6;">
+            Félicitations ! Votre compte PayLink a été créé avec succès.
+            Vous pouvez maintenant commencer à recevoir des paiements Mobile Money.
+          </p>
+          
+          <div style="background: #f1f5f9; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h3 style="color: #1e293b; margin-top: 0;">🚀 Prochaines étapes</h3>
+            <ol style="color: #475569; line-height: 1.8; padding-left: 20px;">
+              <li>Créez votre première page de paiement</li>
+              <li>Personnalisez-la avec vos services</li>
+              <li>Partagez le lien avec vos clients</li>
+              <li>Recevez des paiements instantanément !</li>
+            </ol>
+          </div>
+          
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${frontendUrl}/dashboard" 
+               style="display: inline-block; background: #2563eb; color: white; 
+                      padding: 14px 28px; border-radius: 8px; text-decoration: none;
+                      font-weight: 600;">
+              Accéder à mon dashboard
+            </a>
+          </div>
+          
+          <p style="color: #64748b; font-size: 14px;">
+            Besoin d'aide ? Contactez-nous à 
+            <a href="mailto:support@paylink.cm" style="color: #2563eb;">support@paylink.cm</a>
+          </p>
+          
+          <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 30px 0;">
+          
+          <p style="color: #94a3b8; font-size: 12px; text-align: center;">
+            © ${new Date().getFullYear()} PayLink. Tous droits réservés.<br>
+            Douala, Cameroun
+          </p>
+        </div>
+      `,
+    );
+  }
+
+  /**
    * Normaliser un numéro de téléphone camerounais
    */
   private normalizePhone(phone: string): string {
