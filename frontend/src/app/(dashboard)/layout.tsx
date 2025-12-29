@@ -24,6 +24,7 @@ const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Mes pages', href: '/dashboard/pages', icon: FileText },
   { name: 'Transactions', href: '/dashboard/transactions', icon: Receipt },
+  { name: 'Notifications', href: '/dashboard/notifications', icon: Bell },
   { name: 'Paramètres', href: '/dashboard/settings', icon: Settings },
 ]
 
@@ -183,10 +184,13 @@ export default function DashboardLayout({
             <div className="flex-1" />
 
             <div className="flex items-center gap-4">
-              <button className="relative p-2 text-slate-500 hover:text-slate-700 transition">
+              <Link 
+                href="/dashboard/notifications"
+                className="relative p-2 text-slate-500 hover:text-slate-700 transition"
+              >
                 <Bell className="w-5 h-5" />
                 <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
-              </button>
+              </Link>
             </div>
           </div>
         </header>
