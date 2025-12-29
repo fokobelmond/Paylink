@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { Wallet, ArrowLeft, HelpCircle, MessageCircle, Mail, Phone } from 'lucide-react'
+import { Wallet, ArrowLeft, HelpCircle, Mail, Send } from 'lucide-react'
 
 const faqs = [
   {
@@ -26,7 +26,7 @@ const faqs = [
   },
   {
     question: "Comment contacter le support ?",
-    answer: "Vous pouvez nous joindre par WhatsApp ou par email à support@paylink.cm. Consultez la page Contact pour plus de détails."
+    answer: "Envoyez-nous un email à paylink.now@gmail.com. Nous répondons généralement sous 24 à 48 heures."
   },
 ]
 
@@ -63,32 +63,26 @@ export default function AidePage() {
           </p>
         </div>
 
-        {/* Contact rapide */}
-        <div className="grid md:grid-cols-3 gap-4 mb-12">
-          <Link 
-            href="/contact"
-            className="bg-green-50 border border-green-200 rounded-xl p-6 text-center hover:bg-green-100 transition"
-          >
-            <MessageCircle className="w-8 h-8 text-green-600 mx-auto mb-3" />
-            <h3 className="font-semibold text-slate-900 mb-1">WhatsApp</h3>
-            <p className="text-sm text-slate-600">Réponse rapide</p>
-          </Link>
-          <a 
-            href="mailto:support@paylink.cm"
-            className="bg-blue-50 border border-blue-200 rounded-xl p-6 text-center hover:bg-blue-100 transition"
-          >
-            <Mail className="w-8 h-8 text-blue-600 mx-auto mb-3" />
-            <h3 className="font-semibold text-slate-900 mb-1">Email</h3>
-            <p className="text-sm text-slate-600">support@paylink.cm</p>
-          </a>
-          <Link 
-            href="/contact"
-            className="bg-purple-50 border border-purple-200 rounded-xl p-6 text-center hover:bg-purple-100 transition"
-          >
-            <Phone className="w-8 h-8 text-purple-600 mx-auto mb-3" />
-            <h3 className="font-semibold text-slate-900 mb-1">Téléphone</h3>
-            <p className="text-sm text-slate-600">Voir contact</p>
-          </Link>
+        {/* Contact par email */}
+        <div className="bg-blue-50 border border-blue-200 rounded-xl p-6 mb-12">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center">
+                <Mail className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-slate-900">Besoin d'aide ?</h3>
+                <p className="text-blue-600 font-medium">paylink.now@gmail.com</p>
+              </div>
+            </div>
+            <a 
+              href="mailto:paylink.now@gmail.com"
+              className="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition"
+            >
+              <Send className="w-5 h-5" />
+              Envoyer un email
+            </a>
+          </div>
         </div>
 
         {/* FAQ */}
@@ -109,16 +103,15 @@ export default function AidePage() {
         {/* CTA */}
         <div className="mt-12 text-center">
           <p className="text-slate-600 mb-4">Vous n'avez pas trouvé votre réponse ?</p>
-          <Link 
-            href="/contact"
+          <a 
+            href="mailto:paylink.now@gmail.com"
             className="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition"
           >
-            <MessageCircle className="w-5 h-5" />
-            Contactez-nous
-          </Link>
+            <Mail className="w-5 h-5" />
+            Contactez-nous par email
+          </a>
         </div>
       </main>
     </div>
   )
 }
-

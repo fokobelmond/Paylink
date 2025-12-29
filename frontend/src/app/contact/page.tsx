@@ -3,13 +3,13 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { toast } from 'sonner'
-import { Wallet, ArrowLeft, MessageCircle, Mail, Phone, MapPin, Clock, Loader2 } from 'lucide-react'
+import { Wallet, ArrowLeft, Mail, Clock, MapPin, Loader2, Send } from 'lucide-react'
 
 export default function ContactPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [formData, setFormData] = useState({
     name: '',
-    contact: '',
+    email: '',
     subject: 'Question générale',
     message: '',
   })
@@ -17,20 +17,22 @@ export default function ContactPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    if (!formData.name || !formData.contact || !formData.message) {
+    if (!formData.name || !formData.email || !formData.message) {
       toast.error('Veuillez remplir tous les champs obligatoires')
       return
     }
 
     setIsSubmitting(true)
     
-    // Simuler l'envoi (en production, utiliser une API)
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    // Ouvrir le client mail avec les informations pré-remplies
+    const mailtoLink = `mailto:paylink.now@gmail.com?subject=${encodeURIComponent(`[PayLink] ${formData.subject} - ${formData.name}`)}&body=${encodeURIComponent(`Nom: ${formData.name}\nEmail: ${formData.email}\n\nMessage:\n${formData.message}`)}`
     
-    toast.success('Message envoyé ! Nous vous répondrons bientôt.')
-    setFormData({ name: '', contact: '', subject: 'Question générale', message: '' })
+    window.location.href = mailtoLink
+    
+    toast.success('Redirection vers votre client mail...')
     setIsSubmitting(false)
   }
+
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
@@ -54,64 +56,44 @@ export default function ContactPage() {
       <main className="max-w-4xl mx-auto px-4 py-12">
         {/* Hero */}
         <div className="text-center mb-12">
+          <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Mail className="w-8 h-8 text-blue-600" />
+          </div>
           <h1 className="text-3xl font-bold text-slate-900 mb-4">Contactez-nous</h1>
           <p className="text-lg text-slate-600">
-            Notre équipe est disponible pour vous aider
+            Notre équipe est disponible par email pour vous aider
           </p>
         </div>
 
         <div className="grid md:grid-cols-2 gap-8">
           {/* Infos de contact */}
           <div className="space-y-6">
+            {/* Email - Seul moyen de contact */}
             <div className="bg-white rounded-xl p-6 border border-slate-200">
-              <h2 className="text-xl font-bold text-slate-900 mb-6">Nos coordonnées</h2>
+              <h2 className="text-xl font-bold text-slate-900 mb-6">Notre contact</h2>
               
-              {/* TODO: Remplacer par les vrais numéros de contact */}
-              <div className="space-y-4">
-                <div className="flex items-center gap-4 p-4 bg-green-50 rounded-lg">
-                  <div className="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center">
-                    <MessageCircle className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-slate-900">WhatsApp</h3>
-                    <p className="text-green-600 text-sm">Disponible bientôt</p>
-                  </div>
+              <a 
+                href="mailto:paylink.now@gmail.com"
+                className="flex items-center gap-4 p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition"
+              >
+                <div className="w-14 h-14 bg-blue-600 rounded-full flex items-center justify-center">
+                  <Mail className="w-7 h-7 text-white" />
                 </div>
-
-                <a 
-                  href="mailto:support@paylink.cm"
-                  className="flex items-center gap-4 p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition"
-                >
-                  <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center">
-                    <Mail className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-slate-900">Email</h3>
-                    <p className="text-blue-600">support@paylink.cm</p>
-                  </div>
-                </a>
-
-                <div className="flex items-center gap-4 p-4 bg-purple-50 rounded-lg">
-                  <div className="w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center">
-                    <Phone className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-slate-900">Téléphone</h3>
-                    <p className="text-purple-600 text-sm">Disponible bientôt</p>
-                  </div>
+                <div>
+                  <h3 className="font-semibold text-slate-900 text-lg">Email</h3>
+                  <p className="text-blue-600 font-medium">paylink.now@gmail.com</p>
+                  <p className="text-sm text-slate-500 mt-1">Réponse sous 24-48h</p>
                 </div>
-              </div>
+              </a>
             </div>
 
             <div className="bg-white rounded-xl p-6 border border-slate-200">
               <div className="flex items-center gap-3 mb-4">
                 <Clock className="w-5 h-5 text-slate-600" />
-                <h3 className="font-semibold text-slate-900">Horaires de disponibilité</h3>
+                <h3 className="font-semibold text-slate-900">Délai de réponse</h3>
               </div>
               <p className="text-slate-600">
-                Lundi - Vendredi : 8h00 - 18h00<br />
-                Samedi : 9h00 - 14h00<br />
-                Dimanche : Fermé
+                Nous répondons généralement dans un délai de <strong>24 à 48 heures</strong> ouvrables.
               </p>
             </div>
 
@@ -121,10 +103,19 @@ export default function ContactPage() {
                 <h3 className="font-semibold text-slate-900">Localisation</h3>
               </div>
               <p className="text-slate-600">
-                Douala, Cameroun<br />
-                Akwa, Boulevard de la Liberté
+                Cameroun 🇨🇲<br />
+                Service 100% en ligne
               </p>
             </div>
+
+            {/* CTA Email direct */}
+            <a 
+              href="mailto:paylink.now@gmail.com"
+              className="block w-full bg-blue-600 text-white py-4 rounded-xl font-medium hover:bg-blue-700 transition text-center"
+            >
+              <Mail className="w-5 h-5 inline-block mr-2" />
+              Envoyer un email directement
+            </a>
           </div>
 
           {/* Formulaire de contact */}
@@ -148,14 +139,14 @@ export default function ContactPage() {
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">
-                  Email ou Téléphone *
+                  Votre email *
                 </label>
                 <input 
-                  type="text" 
-                  value={formData.contact}
-                  onChange={(e) => setFormData({ ...formData, contact: e.target.value })}
+                  type="email" 
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-                  placeholder="email@exemple.com ou 6XXXXXXXX"
+                  placeholder="vous@exemple.com"
                   required
                 />
               </div>
@@ -199,16 +190,19 @@ export default function ContactPage() {
                 {isSubmitting ? (
                   <>
                     <Loader2 className="w-5 h-5 animate-spin" />
-                    Envoi en cours...
+                    Ouverture du client mail...
                   </>
                 ) : (
-                  'Envoyer le message'
+                  <>
+                    <Send className="w-5 h-5" />
+                    Envoyer le message
+                  </>
                 )}
               </button>
             </form>
 
             <p className="text-sm text-slate-500 text-center mt-4">
-              Nous vous répondrons dans les 24 heures
+              Ce formulaire ouvrira votre application mail
             </p>
           </div>
         </div>
@@ -216,4 +210,3 @@ export default function ContactPage() {
     </div>
   )
 }
-

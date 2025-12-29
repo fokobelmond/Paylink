@@ -82,7 +82,7 @@ export class NotificationsService {
       }
 
       await this.resend.emails.send({
-        from: this.configService.get('EMAIL_FROM') || 'PayLink <noreply@paylink.cm>',
+        from: this.configService.get('EMAIL_FROM') || 'PayLink <paylink.now@gmail.com>',
         to,
         subject,
         html,
@@ -279,7 +279,7 @@ export class NotificationsService {
           
           <p style="color: #64748b; font-size: 14px;">
             Besoin d'aide ? Contactez-nous à 
-            <a href="mailto:support@paylink.cm" style="color: #2563eb;">support@paylink.cm</a>
+            <a href="mailto:paylink.now@gmail.com" style="color: #2563eb;">paylink.now@gmail.com</a>
           </p>
           
           <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 30px 0;">

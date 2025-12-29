@@ -109,7 +109,7 @@ export default function ConfidentialitePage() {
             </ul>
             <p className="text-slate-600 mb-4">
               Pour exercer ces droits, contactez-nous à : 
-              <a href="mailto:privacy@paylink.cm" className="text-blue-600 hover:underline"> privacy@paylink.cm</a>
+              <a href="mailto:paylink.now@gmail.com" className="text-blue-600 hover:underline"> paylink.now@gmail.com</a>
             </p>
 
             <h2 className="text-xl font-bold text-slate-900 mt-8 mb-4">7. Cookies</h2>
@@ -131,7 +131,7 @@ export default function ConfidentialitePage() {
             <div className="bg-slate-50 rounded-lg p-4">
               <p className="text-slate-700">
                 <strong>PayLink - Protection des données</strong><br />
-                Email : <a href="mailto:privacy@paylink.cm" className="text-blue-600 hover:underline">privacy@paylink.cm</a><br />
+                Email : <a href="mailto:paylink.now@gmail.com" className="text-blue-600 hover:underline">paylink.now@gmail.com</a><br />
                 Adresse : Douala, Cameroun
               </p>
             </div>

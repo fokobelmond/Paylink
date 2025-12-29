@@ -101,7 +101,7 @@ export default function ConditionsPage() {
             <h2 className="text-xl font-bold text-slate-900 mt-8 mb-4">10. Contact</h2>
             <p className="text-slate-600 mb-4">
               Pour toute question relative aux présentes CGU, contactez-nous à : 
-              <a href="mailto:legal@paylink.cm" className="text-blue-600 hover:underline"> legal@paylink.cm</a>
+              <a href="mailto:paylink.now@gmail.com" className="text-blue-600 hover:underline"> paylink.now@gmail.com</a>
             </p>
           </div>
         </div>
