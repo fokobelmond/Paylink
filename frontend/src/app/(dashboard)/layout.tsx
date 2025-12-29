@@ -184,13 +184,13 @@ export default function DashboardLayout({
             <div className="flex-1" />
 
             <div className="flex items-center gap-4">
-              <Link 
-                href="/dashboard/notifications"
-                className="relative p-2 text-slate-500 hover:text-slate-700 transition"
+              <button 
+                onClick={() => router.push('/dashboard/notifications')}
+                className="relative p-2 text-slate-500 hover:text-slate-700 transition cursor-pointer"
               >
                 <Bell className="w-5 h-5" />
                 <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
-              </Link>
+              </button>
             </div>
           </div>
         </header>
