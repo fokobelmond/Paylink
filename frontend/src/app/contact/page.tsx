@@ -1,9 +1,36 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
-import { Wallet, ArrowLeft, MessageCircle, Mail, Phone, MapPin, Clock } from 'lucide-react'
+import { toast } from 'sonner'
+import { Wallet, ArrowLeft, MessageCircle, Mail, Phone, MapPin, Clock, Loader2 } from 'lucide-react'
 
 export default function ContactPage() {
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [formData, setFormData] = useState({
+    name: '',
+    contact: '',
+    subject: 'Question générale',
+    message: '',
+  })
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    if (!formData.name || !formData.contact || !formData.message) {
+      toast.error('Veuillez remplir tous les champs obligatoires')
+      return
+    }
+
+    setIsSubmitting(true)
+    
+    // Simuler l'envoi (en production, utiliser une API)
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    
+    toast.success('Message envoyé ! Nous vous répondrons bientôt.')
+    setFormData({ name: '', contact: '', subject: 'Question générale', message: '' })
+    setIsSubmitting(false)
+  }
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
@@ -39,20 +66,17 @@ export default function ContactPage() {
             <div className="bg-white rounded-xl p-6 border border-slate-200">
               <h2 className="text-xl font-bold text-slate-900 mb-6">Nos coordonnées</h2>
               
+              {/* TODO: Remplacer par les vrais numéros de contact */}
               <div className="space-y-4">
-                <a 
-                  href="https://wa.me/237600000000"
-                  target="_blank"
-                  className="flex items-center gap-4 p-4 bg-green-50 rounded-lg hover:bg-green-100 transition"
-                >
+                <div className="flex items-center gap-4 p-4 bg-green-50 rounded-lg">
                   <div className="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center">
                     <MessageCircle className="w-6 h-6 text-white" />
                   </div>
                   <div>
                     <h3 className="font-semibold text-slate-900">WhatsApp</h3>
-                    <p className="text-green-600">+237 6XX XXX XXX</p>
+                    <p className="text-green-600 text-sm">Disponible bientôt</p>
                   </div>
-                </a>
+                </div>
 
                 <a 
                   href="mailto:support@paylink.cm"
@@ -67,18 +91,15 @@ export default function ContactPage() {
                   </div>
                 </a>
 
-                <a 
-                  href="tel:+237600000000"
-                  className="flex items-center gap-4 p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition"
-                >
+                <div className="flex items-center gap-4 p-4 bg-purple-50 rounded-lg">
                   <div className="w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center">
                     <Phone className="w-6 h-6 text-white" />
                   </div>
                   <div>
                     <h3 className="font-semibold text-slate-900">Téléphone</h3>
-                    <p className="text-purple-600">+237 6XX XXX XXX</p>
+                    <p className="text-purple-600 text-sm">Disponible bientôt</p>
                   </div>
-                </a>
+                </div>
               </div>
             </div>
 
@@ -110,26 +131,32 @@ export default function ContactPage() {
           <div className="bg-white rounded-xl p-6 border border-slate-200">
             <h2 className="text-xl font-bold text-slate-900 mb-6">Envoyez-nous un message</h2>
             
-            <form className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">
-                  Nom complet
+                  Nom complet *
                 </label>
                 <input 
                   type="text" 
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
                   placeholder="Votre nom"
+                  required
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">
-                  Email ou Téléphone
+                  Email ou Téléphone *
                 </label>
                 <input 
                   type="text" 
+                  value={formData.contact}
+                  onChange={(e) => setFormData({ ...formData, contact: e.target.value })}
                   className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
                   placeholder="email@exemple.com ou 6XXXXXXXX"
+                  required
                 />
               </div>
 
@@ -137,7 +164,11 @@ export default function ContactPage() {
                 <label className="block text-sm font-medium text-slate-700 mb-1">
                   Sujet
                 </label>
-                <select className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+                <select 
+                  value={formData.subject}
+                  onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                >
                   <option>Question générale</option>
                   <option>Problème technique</option>
                   <option>Paiement / Transaction</option>
@@ -148,20 +179,31 @@ export default function ContactPage() {
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">
-                  Message
+                  Message *
                 </label>
                 <textarea 
                   rows={4}
+                  value={formData.message}
+                  onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                   className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition resize-none"
                   placeholder="Décrivez votre demande..."
+                  required
                 />
               </div>
 
               <button 
                 type="submit"
-                className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition"
+                disabled={isSubmitting}
+                className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
-                Envoyer le message
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Envoi en cours...
+                  </>
+                ) : (
+                  'Envoyer le message'
+                )}
               </button>
             </form>
 

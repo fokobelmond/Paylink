@@ -1,0 +1,12 @@
+# PayLink - Robots.txt
+
+User-agent: *
+Allow: /
+
+# Pages privées
+Disallow: /dashboard
+Disallow: /pay
+
+# Sitemap
+Sitemap: https://paylink.cm/sitemap.xml
+

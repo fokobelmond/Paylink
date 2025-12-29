@@ -26,7 +26,7 @@ const faqs = [
   },
   {
     question: "Comment contacter le support ?",
-    answer: "Vous pouvez nous joindre par WhatsApp au +237 6XX XXX XXX ou par email à support@paylink.cm"
+    answer: "Vous pouvez nous joindre par WhatsApp ou par email à support@paylink.cm. Consultez la page Contact pour plus de détails."
   },
 ]
 
@@ -65,15 +65,14 @@ export default function AidePage() {
 
         {/* Contact rapide */}
         <div className="grid md:grid-cols-3 gap-4 mb-12">
-          <a 
-            href="https://wa.me/237600000000" 
-            target="_blank"
+          <Link 
+            href="/contact"
             className="bg-green-50 border border-green-200 rounded-xl p-6 text-center hover:bg-green-100 transition"
           >
             <MessageCircle className="w-8 h-8 text-green-600 mx-auto mb-3" />
             <h3 className="font-semibold text-slate-900 mb-1">WhatsApp</h3>
             <p className="text-sm text-slate-600">Réponse rapide</p>
-          </a>
+          </Link>
           <a 
             href="mailto:support@paylink.cm"
             className="bg-blue-50 border border-blue-200 rounded-xl p-6 text-center hover:bg-blue-100 transition"
@@ -82,14 +81,14 @@ export default function AidePage() {
             <h3 className="font-semibold text-slate-900 mb-1">Email</h3>
             <p className="text-sm text-slate-600">support@paylink.cm</p>
           </a>
-          <a 
-            href="tel:+237600000000"
+          <Link 
+            href="/contact"
             className="bg-purple-50 border border-purple-200 rounded-xl p-6 text-center hover:bg-purple-100 transition"
           >
             <Phone className="w-8 h-8 text-purple-600 mx-auto mb-3" />
             <h3 className="font-semibold text-slate-900 mb-1">Téléphone</h3>
-            <p className="text-sm text-slate-600">+237 6XX XXX XXX</p>
-          </a>
+            <p className="text-sm text-slate-600">Voir contact</p>
+          </Link>
         </div>
 
         {/* FAQ */}
@@ -110,14 +109,13 @@ export default function AidePage() {
         {/* CTA */}
         <div className="mt-12 text-center">
           <p className="text-slate-600 mb-4">Vous n'avez pas trouvé votre réponse ?</p>
-          <a 
-            href="https://wa.me/237600000000"
-            target="_blank"
-            className="inline-flex items-center gap-2 bg-green-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-green-700 transition"
+          <Link 
+            href="/contact"
+            className="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition"
           >
             <MessageCircle className="w-5 h-5" />
-            Contactez-nous sur WhatsApp
-          </a>
+            Contactez-nous
+          </Link>
         </div>
       </main>
     </div>
