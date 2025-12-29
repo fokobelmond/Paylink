@@ -183,13 +183,17 @@ export default function DashboardLayout({
 
             <div className="flex-1" />
 
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 relative z-50">
               <button 
-                onClick={() => router.push('/dashboard/notifications')}
-                className="relative p-2 text-slate-500 hover:text-slate-700 transition cursor-pointer"
+                type="button"
+                onClick={() => {
+                  console.log('Bell clicked!')
+                  router.push('/dashboard/notifications')
+                }}
+                className="relative p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition cursor-pointer"
               >
                 <Bell className="w-5 h-5" />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
+                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full pointer-events-none" />
               </button>
             </div>
           </div>
