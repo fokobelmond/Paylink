@@ -26,6 +26,7 @@ export default function LoginPage() {
   const { login } = useAuthStore()
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [rememberMe, setRememberMe] = useState(true)
 
   const {
     register,
@@ -39,7 +40,7 @@ export default function LoginPage() {
     setIsLoading(true)
 
     try {
-      await login(data)
+      await login(data, rememberMe)
       toast.success('Connexion réussie !')
       router.push('/dashboard')
     } catch (error) {
@@ -106,10 +107,12 @@ export default function LoginPage() {
             </div>
 
             <div className="flex items-center justify-between">
-              <label className="flex items-center gap-2 cursor-pointer">
+              <label className="flex items-center gap-2 cursor-pointer select-none">
                 <input
                   type="checkbox"
-                  className="w-4 h-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="w-4 h-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500 cursor-pointer"
                 />
                 <span className="text-sm text-slate-600">Se souvenir de moi</span>
               </label>

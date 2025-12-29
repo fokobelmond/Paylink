@@ -20,7 +20,8 @@ class ApiClient {
 
   private getToken(): string | null {
     if (typeof window === 'undefined') return null
-    return localStorage.getItem('accessToken')
+    // Vérifier les deux storages (localStorage pour "Se souvenir de moi", sessionStorage sinon)
+    return localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken')
   }
 
   async request<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {

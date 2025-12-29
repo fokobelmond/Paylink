@@ -8,9 +8,10 @@ interface AuthState {
   tokens: AuthTokens | null
   isLoading: boolean
   isAuthenticated: boolean
+  rememberMe: boolean
 
   // Actions
-  login: (data: LoginInput) => Promise<void>
+  login: (data: LoginInput, rememberMe?: boolean) => Promise<void>
   register: (data: RegisterInput) => Promise<void>
   logout: () => Promise<void>
   refreshAuth: () => Promise<void>
@@ -19,6 +20,9 @@ interface AuthState {
   checkAuth: () => Promise<void>
 }
 
+// Helper pour le stockage
+const getStorage = (rememberMe: boolean) => rememberMe ? localStorage : sessionStorage
+
 export const useAuthStore = create<AuthState>()(
   persist(
     (set, get) => ({
@@ -26,22 +30,34 @@ export const useAuthStore = create<AuthState>()(
       tokens: null,
       isLoading: true,
       isAuthenticated: false,
+      rememberMe: true,
 
-      login: async (data: LoginInput) => {
+      login: async (data: LoginInput, rememberMe = true) => {
         const response = await authApi.login(data)
 
         if (response.success) {
           const { user, accessToken, refreshToken } = response.data
+          const storage = getStorage(rememberMe)
 
-          // Sauvegarder le token dans localStorage pour les requêtes API
-          localStorage.setItem('accessToken', accessToken)
-          localStorage.setItem('refreshToken', refreshToken)
+          // Sauvegarder le token selon le choix de l'utilisateur
+          storage.setItem('accessToken', accessToken)
+          storage.setItem('refreshToken', refreshToken)
+          
+          // Nettoyer l'autre storage
+          if (rememberMe) {
+            sessionStorage.removeItem('accessToken')
+            sessionStorage.removeItem('refreshToken')
+          } else {
+            localStorage.removeItem('accessToken')
+            localStorage.removeItem('refreshToken')
+          }
 
           set({
             user,
             tokens: { accessToken, refreshToken },
             isAuthenticated: true,
             isLoading: false,
+            rememberMe,
           })
         }
       },
@@ -70,14 +86,18 @@ export const useAuthStore = create<AuthState>()(
         } catch {
           // Ignorer les erreurs de logout
         } finally {
+          // Nettoyer les deux storages
           localStorage.removeItem('accessToken')
           localStorage.removeItem('refreshToken')
+          sessionStorage.removeItem('accessToken')
+          sessionStorage.removeItem('refreshToken')
 
           set({
             user: null,
             tokens: null,
             isAuthenticated: false,
             isLoading: false,
+            rememberMe: true,
           })
         }
       },
@@ -110,7 +130,8 @@ export const useAuthStore = create<AuthState>()(
       },
 
       checkAuth: async () => {
-        const accessToken = localStorage.getItem('accessToken')
+        // Vérifier les deux storages
+        const accessToken = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken')
 
         if (!accessToken) {
           set({ isLoading: false, isAuthenticated: false })
