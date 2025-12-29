@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useForm } from 'react-hook-form'
@@ -15,6 +15,9 @@ import {
   Palette,
   FileText,
   Sparkles,
+  Loader2,
+  X,
+  AlertCircle,
 } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
@@ -83,12 +86,18 @@ export default function NewPagePage() {
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateType | null>(null)
   const [selectedColor, setSelectedColor] = useState(colors[0])
   const [isLoading, setIsLoading] = useState(false)
+  
+  // État pour la vérification du slug
+  const [slugStatus, setSlugStatus] = useState<'idle' | 'checking' | 'available' | 'taken'>('idle')
+  const [slugCheckTimeout, setSlugCheckTimeout] = useState<NodeJS.Timeout | null>(null)
 
   const {
     register,
     handleSubmit,
     watch,
     setValue,
+    setError,
+    clearErrors,
     formState: { errors },
   } = useForm<PageFormData>({
     resolver: zodResolver(pageSchema),
@@ -100,17 +109,89 @@ export default function NewPagePage() {
   })
 
   const title = watch('title')
+  const currentSlug = watch('slug')
+
+  // Vérifier la disponibilité du slug avec debounce
+  const checkSlugAvailability = useCallback(async (slug: string) => {
+    if (!slug || slug.length < 3) {
+      setSlugStatus('idle')
+      return
+    }
+
+    // Valider le format du slug
+    if (!/^[a-z0-9-]+$/.test(slug)) {
+      setSlugStatus('idle')
+      return
+    }
+
+    setSlugStatus('checking')
+    
+    try {
+      const res = await pagesApi.checkSlug(slug)
+      if (res.success && res.data.available) {
+        setSlugStatus('available')
+        clearErrors('slug')
+      } else {
+        setSlugStatus('taken')
+        setError('slug', { message: 'Cette URL est déjà prise. Choisissez-en une autre.' })
+      }
+    } catch {
+      // En cas d'erreur réseau, on ne bloque pas
+      setSlugStatus('idle')
+    }
+  }, [setError, clearErrors])
+
+  // Debounce la vérification du slug
+  useEffect(() => {
+    if (slugCheckTimeout) {
+      clearTimeout(slugCheckTimeout)
+    }
+
+    if (currentSlug && currentSlug.length >= 3) {
+      const timeout = setTimeout(() => {
+        checkSlugAvailability(currentSlug)
+      }, 500) // 500ms de debounce
+      setSlugCheckTimeout(timeout)
+    } else {
+      setSlugStatus('idle')
+    }
+
+    return () => {
+      if (slugCheckTimeout) {
+        clearTimeout(slugCheckTimeout)
+      }
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentSlug])
 
   // Générer le slug automatiquement depuis le titre
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newTitle = e.target.value
     setValue('title', newTitle)
-    setValue('slug', generateSlug(newTitle))
+    const newSlug = generateSlug(newTitle)
+    setValue('slug', newSlug)
+  }
+
+  // Gérer le changement manuel du slug
+  const handleSlugChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newSlug = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '')
+    setValue('slug', newSlug)
   }
 
   const onSubmit = async (data: PageFormData) => {
     if (!selectedTemplate) {
       toast.error('Sélectionnez un template')
+      return
+    }
+
+    // Vérifier que le slug est disponible
+    if (slugStatus === 'taken') {
+      toast.error('Cette URL est déjà prise. Choisissez-en une autre.')
+      return
+    }
+
+    if (slugStatus === 'checking') {
+      toast.error('Vérification de l\'URL en cours...')
       return
     }
 
@@ -140,7 +221,9 @@ export default function NewPagePage() {
       if (apiError.statusCode === 403) {
         toast.error('Vous avez atteint la limite de pages. Passez à un plan supérieur.')
       } else if (apiError.statusCode === 409) {
-        toast.error('Ce slug est déjà utilisé. Choisissez un autre nom.')
+        toast.error('Cette URL est déjà utilisée. Choisissez-en une autre.')
+        setSlugStatus('taken')
+        setError('slug', { message: 'Cette URL est déjà prise.' })
       } else if (apiError.statusCode === 401) {
         toast.error('Session expirée. Veuillez vous reconnecter.')
         router.push('/login')
@@ -153,7 +236,7 @@ export default function NewPagePage() {
   }
 
   const canProceedToStep2 = selectedTemplate !== null
-  const canProceedToStep3 = title.length >= 2
+  const canProceedToStep3 = title.length >= 2 && slugStatus !== 'taken' && currentSlug.length >= 3
 
   return (
     <div className="max-w-3xl mx-auto">
@@ -285,15 +368,53 @@ export default function NewPagePage() {
               />
 
               <div>
-                <Input
-                  label="URL de la page"
-                  placeholder="ma-boutique"
-                  error={errors.slug?.message}
-                  {...register('slug')}
-                />
-                <p className="mt-1.5 text-sm text-slate-500">
-                  paylink.cm/p/<span className="font-medium">{watch('slug') || 'mon-slug'}</span>
-                </p>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                  URL de la page
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={currentSlug}
+                    onChange={handleSlugChange}
+                    placeholder="ma-boutique"
+                    className={cn(
+                      'w-full px-4 py-3 pr-10 rounded-lg border bg-white text-slate-900 placeholder:text-slate-400 transition-all duration-200 focus:ring-2 focus:outline-none',
+                      errors.slug 
+                        ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20'
+                        : slugStatus === 'available'
+                        ? 'border-green-300 focus:border-green-500 focus:ring-green-500/20'
+                        : 'border-slate-300 focus:border-primary-500 focus:ring-primary-500/20'
+                    )}
+                  />
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                    {slugStatus === 'checking' && (
+                      <Loader2 className="w-5 h-5 text-slate-400 animate-spin" />
+                    )}
+                    {slugStatus === 'available' && (
+                      <Check className="w-5 h-5 text-green-500" />
+                    )}
+                    {slugStatus === 'taken' && (
+                      <X className="w-5 h-5 text-red-500" />
+                    )}
+                  </div>
+                </div>
+                <div className="mt-1.5 flex items-center justify-between">
+                  <p className="text-sm text-slate-500">
+                    paylink.cm/p/<span className="font-medium">{currentSlug || 'mon-slug'}</span>
+                  </p>
+                  {slugStatus === 'available' && (
+                    <span className="text-xs text-green-600 font-medium">✓ Disponible</span>
+                  )}
+                  {slugStatus === 'taken' && (
+                    <span className="text-xs text-red-600 font-medium flex items-center gap-1">
+                      <AlertCircle className="w-3 h-3" />
+                      URL déjà prise
+                    </span>
+                  )}
+                </div>
+                {errors.slug && (
+                  <p className="mt-1 text-sm text-red-600">{errors.slug.message}</p>
+                )}
               </div>
 
               <div>

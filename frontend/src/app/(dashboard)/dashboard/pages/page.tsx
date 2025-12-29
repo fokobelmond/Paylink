@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import {
   Plus,
@@ -16,6 +17,8 @@ import {
   Pause,
   Play,
   Loader2,
+  RefreshCw,
+  AlertCircle,
 } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
@@ -23,35 +26,48 @@ import { formatRelativeDate, copyToClipboard, cn } from '@/lib/utils'
 import { TEMPLATE_ICONS, TEMPLATE_LABELS } from '@/types'
 import { pagesApi } from '@/lib/api'
 import { toast } from 'sonner'
-import type { Page } from '@/types'
+import type { Page, ApiError } from '@/types'
 
 export default function PagesListPage() {
+  const router = useRouter()
   const [pages, setPages] = useState<Page[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [copiedSlug, setCopiedSlug] = useState<string | null>(null)
   const [openMenuId, setOpenMenuId] = useState<string | null>(null)
 
-  // Charger les pages depuis le backend
-  useEffect(() => {
-    const fetchPages = async () => {
-      setIsLoading(true)
-      try {
-        const res = await pagesApi.list(1, 50)
-        if (res.success) {
-          setPages(res.data.data)
-        } else {
-          toast.error('Erreur lors du chargement des pages')
-        }
-      } catch (error) {
-        console.error('Failed to fetch pages:', error)
-        toast.error('Erreur réseau')
-      } finally {
-        setIsLoading(false)
+  // Fonction pour charger les pages
+  const fetchPages = useCallback(async () => {
+    setIsLoading(true)
+    setError(null)
+    try {
+      const res = await pagesApi.list(1, 50)
+      if (res.success && res.data) {
+        setPages(res.data.data || [])
+      } else {
+        setError('Erreur lors du chargement des pages')
+        toast.error('Erreur lors du chargement des pages')
       }
+    } catch (err) {
+      console.error('Failed to fetch pages:', err)
+      const apiError = err as ApiError
+      if (apiError.statusCode === 401) {
+        toast.error('Session expirée. Veuillez vous reconnecter.')
+        router.push('/login')
+      } else {
+        setError(apiError.message || 'Erreur réseau')
+        toast.error('Erreur réseau')
+      }
+    } finally {
+      setIsLoading(false)
     }
+  }, [router])
+
+  // Charger les pages au montage
+  useEffect(() => {
     fetchPages()
-  }, [])
+  }, [fetchPages])
 
   // Supprimer une page
   const handleDelete = async (pageId: string) => {
@@ -144,6 +160,19 @@ export default function PagesListPage() {
     )
   }
 
+  if (error) {
+    return (
+      <div className="text-center py-12 bg-white rounded-xl border border-slate-200">
+        <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
+        <h3 className="text-lg font-semibold text-slate-900 mb-2">Erreur de chargement</h3>
+        <p className="text-slate-600 mb-6">{error}</p>
+        <Button onClick={fetchPages} leftIcon={<RefreshCw className="w-4 h-4" />}>
+          Réessayer
+        </Button>
+      </div>
+    )
+  }
+
   return (
     <div>
       {/* Header */}
@@ -151,14 +180,19 @@ export default function PagesListPage() {
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Mes pages</h1>
           <p className="text-slate-600 mt-1">
-            Gérez vos pages de paiement
+            {pages.length > 0 ? `${pages.length} page(s) créée(s)` : 'Gérez vos pages de paiement'}
           </p>
         </div>
-        <Link href="/dashboard/pages/new">
-          <Button leftIcon={<Plus className="w-4 h-4" />}>
-            Créer une page
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" size="sm" onClick={fetchPages} title="Rafraîchir">
+            <RefreshCw className="w-4 h-4" />
           </Button>
-        </Link>
+          <Link href="/dashboard/pages/new">
+            <Button leftIcon={<Plus className="w-4 h-4" />}>
+              Créer une page
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {/* Search */}

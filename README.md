@@ -462,9 +462,8 @@ Propriétaire - Tous droits réservés.
 
 ## 📞 Support
 
-- 📧 Email: fokobelmond@gmail.com
-- 💬 WhatsApp: +33 775846398
-- 🌐 Site: https://paylink-now.vercel.app/
+- 📧 Email: paylink.now@gmail.com
+- 🌐 Site: https://paylink-one.vercel.app/
 
 ---
 
