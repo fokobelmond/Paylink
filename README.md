@@ -463,7 +463,7 @@ Propriétaire - Tous droits réservés.
 ## 📞 Support
 
 - 📧 Email: paylink.now@gmail.com
-- 🌐 Site: https://paylink-one.vercel.app/
+- 🌐 Site: https://paylink-now.vercel.app/
 
 ---
 

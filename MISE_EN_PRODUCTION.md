@@ -42,7 +42,7 @@ JWT_SECRET="GENERER_AVEC_openssl_rand_base64_32"
 JWT_REFRESH_SECRET="GENERER_AVEC_openssl_rand_base64_32"
 
 # URLs
-FRONTEND_URL="https://paylink-one.vercel.app"
+FRONTEND_URL="https://paylink-now.vercel.app"
 PORT=4000
 NODE_ENV="production"
 
@@ -94,7 +94,7 @@ Railway gère mieux les monorepos et a moins de problèmes de configuration.
    - `DATABASE_URL` = ta connection string Neon
    - `JWT_SECRET` = généré aléatoirement
    - `JWT_REFRESH_SECRET` = généré aléatoirement
-   - `FRONTEND_URL` = https://paylink-one.vercel.app
+   - `FRONTEND_URL` = https://paylink-now.vercel.app
    - `NODE_ENV` = production
    - `PORT` = 4000
 
