@@ -19,6 +19,7 @@ async function bootstrap() {
     process.env.FRONTEND_URL,
     'http://localhost:3000',
     'http://localhost:3001',
+    'https://paylink-now.vercel.app',
     'https://paylink-one.vercel.app',
     'https://paylink.vercel.app',
   ].filter(Boolean);
